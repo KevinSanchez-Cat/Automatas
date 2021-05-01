@@ -31,28 +31,27 @@ public class Main extends javax.swing.JFrame {
     /**
      * Creates new form Main
      */
-    
     public static String cadena;
     File archivo;
     FileInputStream input;
     FileOutputStream output;
     Boolean error;
     TablaSemantico t = new TablaSemantico();
-    
+
     public Main() {
         archivo = new File("Codigo.txt");
         initComponents();
         setLocationRelativeTo(null);
         lexico.setEditable(false);
-        DefaultTableModel modelo = new DefaultTableModel(){
+        DefaultTableModel modelo = new DefaultTableModel() {
             @Override
-            public boolean isCellEditable(int row, int column){
+            public boolean isCellEditable(int row, int column) {
                 return false;
             }
-        }; 
-        
+        };
+
         t.setVisible(true);
-        
+
         // Columnas de la tabla
 //        modelo.addColumn("Tipo");
 //        modelo.addColumn("Variable");
@@ -282,7 +281,7 @@ public class Main extends javax.swing.JFrame {
         try {
             input = new FileInputStream(archivo);
             int letra;
-            while((letra = input.read()) != -1){
+            while ((letra = input.read()) != -1) {
                 char caracter = (char) letra;
                 a += caracter;
             }
@@ -295,19 +294,19 @@ public class Main extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "El archivo de texto se encuentra vacío", "Inténtelo de nuevo", JOptionPane.INFORMATION_MESSAGE);
             lexico.setText("");
         } else {
-            fuente.setText(a);            
+            fuente.setText(a);
         }
     }//GEN-LAST:event_btnCargaActionPerformed
-    
+
     public static ArrayList<TablaSimbolos> lexema = new ArrayList<TablaSimbolos>();
-    
+
     private void btnLexicoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLexicoActionPerformed
         lexico();
     }//GEN-LAST:event_btnLexicoActionPerformed
 
     private void btnGuardaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardaActionPerformed
         try {
-            output  = new FileOutputStream(archivo);
+            output = new FileOutputStream(archivo);
             byte[] txt = fuente.getText().getBytes();
             output.write(txt);
             JOptionPane.showMessageDialog(null, "Se ha guardado el programa fuente", "Escritura exitosa", JOptionPane.INFORMATION_MESSAGE);
@@ -325,10 +324,10 @@ public class Main extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnLimpiaActionPerformed
 
-    public static void notificar_er(String cad){
-        sintactico.append(cad+"\n\n");
+    public static void notificar_er(String cad) {
+        sintactico.append(cad + "\n\n");
     }
-    
+
     private void btnSintacticoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSintacticoActionPerformed
         sintactico();
     }//GEN-LAST:event_btnSintacticoActionPerformed
@@ -338,18 +337,18 @@ public class Main extends javax.swing.JFrame {
         sintactico();
         semantico();
     }//GEN-LAST:event_btnAnaliza1ActionPerformed
-    
+
     boolean l = true;
-    
+
     private void btnAnaliza2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnaliza2ActionPerformed
         // TODO add your handling code here:
         lexico();
         Intermedio.operaciones = "";
         sintactico();
         semantico();
-        Intermedio.temp  = 0;
-        
-        
+        Intermedio.temp = 0;
+
+
     }//GEN-LAST:event_btnAnaliza2ActionPerformed
 
     private void btnAnaliza3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnaliza3ActionPerformed
@@ -357,11 +356,12 @@ public class Main extends javax.swing.JFrame {
 //        Intermedio.intermedio(lexema);
         objeto.setText(Intermedio.operaciones);
     }//GEN-LAST:event_btnAnaliza3ActionPerformed
-        
-    private void lexico(){
-        l= true;
+    ArrayList<analisis.Lexema> lexemas;
+
+    private void lexico() {
+        l = true;
         String expresion = fuente.getText() + " ";
-        if (expresion.trim().length() == 0) {
+        /*  if (expresion.trim().length() == 0) {
             JOptionPane.showMessageDialog(null, "No se ha escrito el codigo fuente", "Lectura exitosa", JOptionPane.INFORMATION_MESSAGE);
             lexico.setText("");
         } else {
@@ -375,9 +375,25 @@ public class Main extends javax.swing.JFrame {
                 lexico.setText(cadena);
                 lexico.setForeground(new Color(25, 111, 61));
             }
+        }*/
+        analisis.Lexico analisisLexico = new analisis.Lexico(expresion, "+-=*&| {}()[]!?^/%;:,<>\n\t\r\b\f", "Tabla del automata general.xlsx");
+
+        lexemas = analisisLexico.analisisLexico();
+        String cad = "Lexema\tNombre\tToken\tRenglon\n";
+        for (int p = 0; p < lexemas.size(); p++) {
+            //textoMostrar += " " +  + "\t" +  + "\t" + lexemas.get(i).getNumToken() + "\t" + lexemas.get(i).getRenglon() + "\n";
+            cad += ""
+                    + lexemas.get(p).getLexema() + "\t"
+                    + "t" + String.valueOf(lexemas.get(p).getNumToken()) + "   ➡ \t"
+                    + lexemas.get(p).getNombreToken() + "    \t"
+                    + String.valueOf(lexemas.get(p).getRenglon()) + "\n";
+
         }
+        lexico.setText(cad);
+        lexico.setForeground(new Color(25, 111, 61));
     }
-    private void sintactico(){
+
+    private void sintactico() {
         String expresion = fuente.getText() + " ";
         sintactico.setText("");
         lexema.clear();
@@ -389,7 +405,7 @@ public class Main extends javax.swing.JFrame {
             Sintax s = new Sintax(new codigo.LexerCup(new StringReader(ST)));
             try {
                 s.parse();
-                if (sintactico.getText().equals("")){
+                if (sintactico.getText().equals("")) {
                     sintactico.append("Análisis realizado correctamente");
                     sintactico.setForeground(new Color(25, 111, 61));
                 } else {
@@ -403,7 +419,8 @@ public class Main extends javax.swing.JFrame {
             }
         }
     }
-    private void semantico(){
+
+    private void semantico() {
         semantico.setText("");
         String expresion = fuente.getText() + " ";
         if (expresion.trim().length() == 0) {
@@ -416,16 +433,16 @@ public class Main extends javax.swing.JFrame {
             if (sem.mensajesError.equals("")) {
                 semantico.append("Análisis realizado correctamente");
                 semantico.setForeground(new Color(25, 111, 61));
-            } else{
+            } else {
                 semantico.setForeground(Color.RED);
                 semantico.setText(sem.mensajesError);
             }
-            DefaultTableModel modelo = new DefaultTableModel(){
+            DefaultTableModel modelo = new DefaultTableModel() {
                 @Override
-                public boolean isCellEditable(int row, int column){
+                public boolean isCellEditable(int row, int column) {
                     return false;
                 }
-            }; 
+            };
 
             // Columnas de la tabla
             modelo.addColumn("Tipo");
@@ -435,7 +452,7 @@ public class Main extends javax.swing.JFrame {
             modelo.addColumn("Inicializada");
             String unica, inicializada;
             for (int i = 0; i < sem.tablaSimbolos.size(); i++) {
-                Object fila [] = new Object[5];
+                Object fila[] = new Object[5];
                 fila[0] = sem.tablaSimbolos.get(i).getTipo();
                 fila[1] = sem.tablaSimbolos.get(i).getVariable();
                 fila[2] = sem.tablaSimbolos.get(i).getValor();
@@ -454,9 +471,9 @@ public class Main extends javax.swing.JFrame {
                 modelo.addRow(fila);
             }
             t.variables.setModel(modelo);
-        }   
+        }
     }
-    
+
     /**
      * @param args the command line arguments
      */
